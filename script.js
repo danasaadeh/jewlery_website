@@ -256,13 +256,14 @@ function saveCart() {
   localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-// Add to cart
 function addToCart(product) {
   const existing = cart.find((item) => item.id === product.id);
   if (existing) {
     existing.quantity++;
+    showSnackbar(`${product.title} quantity updated in cart.`);
   } else {
     cart.push({ ...product, quantity: 1 });
+    showSnackbar(`${product.title} added to cart.`);
   }
   saveCart();
   renderCart();
@@ -380,6 +381,15 @@ function searchProducts(e) {
     renderProducts(matchedProducts, "#recommended-list");
   });
 }
+let currentProduct = null; // track product in popup
+
+document
+  .getElementById("product_details_add_to_cart")
+  .addEventListener("click", () => {
+    if (currentProduct) {
+      addToCart(currentProduct);
+    }
+  });
 
 function createProductElement(product) {
   try {
@@ -427,6 +437,8 @@ function createProductElement(product) {
       popup.querySelector(
         "#product_details_color"
       ).textContent = `Color: ${product.color}`;
+      // 👉 Save the product for the dialog's Add to Cart
+      currentProduct = product;
     });
 
     productElementContainer.appendChild(productElementImage);
@@ -441,6 +453,14 @@ function createProductElement(product) {
   }
 }
 
+document
+  .getElementById("product_details_add_to_cart")
+  .addEventListener("click", () => {
+    if (currentProduct) {
+      addToCart(currentProduct);
+    }
+  });
+
 function renderProducts(products, containerId) {
   const container = document.querySelector(containerId);
   container.innerHTML = "";
@@ -454,6 +474,15 @@ function renderProducts(products, containerId) {
     const productElement = createProductElement(p);
     container.appendChild(productElement);
   });
+}
+function showSnackbar(message) {
+  const snackbar = document.getElementById("snackbar");
+  snackbar.textContent = message;
+  snackbar.className = "show";
+
+  setTimeout(() => {
+    snackbar.className = snackbar.className.replace("show", "");
+  }, 3000); // hide after 3s
 }
 
 renderCart();
